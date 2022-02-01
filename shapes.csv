@@ -1,4 +1,4 @@
-Shape,X,Y,Width,Height,Color,Cx,Cy,R,,,
+Shape,X,Y,Width,Height,Fill,Cx,Cy,R,,,
 circle, , , , ,red,180,180,40, , , 
 circle, , , , ,green,160,160,30, , , 
 rect,20,30,100,50,blue, , , , , , 
