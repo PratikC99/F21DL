@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+
+<body>
+  <div>div</div>
+  <script>
+    function ex3() {
+      for (let i=1; i<11; i++) {
+        if (i<6) {
+          let newele = d3.select("body").append('div')
+          newele.text(i)
+          newele.style("color", "red")
+        } else {
+          let newele = d3.select("body").append('div')
+          newele.text(i)
+          newele.style("color", "green")
+        }
+      }
+    }
+    ex3()
+  </script>
+</body>
+</html>
