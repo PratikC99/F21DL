@@ -1,5 +1,5 @@
-Shape,X,Y,Width,Height,Fill,Cx,Cy,R,,,
-circle, , , , ,#FF0000,180,180,40, , , 
-circle, , , , ,#008000,160,160,30, , , 
-rect,20,30,100,50,#0000FF, , , , , , 
-,,,,,,, , , , , 
+shape,dimension_json,position_x,position_y,stroke_color,stroke_width,fill
+circle,{'r':'100'},200,200,red,4,red
+ellipse,"{'rx':'150','ry':'100'}",200,200,green,4,blue
+rectangle,"{'width':'150','height':'100'}",100,150,blue,4,green
+line,{'length':'200'},100,200,purple,4,purple
