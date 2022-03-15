@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+
+<body style="background-color:rgb(176, 230, 205);">
+	<style>
+		h1,
+		h3,
+		h4,
+		p {
+			font-family: Arial;
+			text-align: center;
+		}
+
+		button {
+			font-family: Arial;
+			border: 2px solid black;
+			width: 125px;
+			height: 25px;
+			background-color: rgb(179, 236, 243);
+			color: black;
+		}
+    div {
+      text-align: center;
+    }
+	</style>
+	<button onclick="window.location.href='Start.html'">Back</button>
+	<h1>Is there a relationship between the relative 'wealth' of a population and the evolution of the pandemic?</h1>
+    <div>
+        <button id="2020Button" onclick="display(2020)">2020</button>
+        <button id="2021Button" onclick="display(2021)">2021</button>
+        <button id="2022Button" onclick="display(2022)">2022</button>
+        <button id="avgButton" onclick="display('Average')">All Years</button>
+    </div>
+    <h3><a style="text-decoration: underline;">Key:</a><br>
+        <a style="color:blue">Average GDP Per Capita per year</a><br>
+        <a style="color:rgb(179, 236, 243)">Average New COVID-19 Cases per year</a>
+    </h3>
+    <p></p>
+	<script>
+
+    // importing data from the covid dataset
+    var datalink = "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv";
+    
+        // setting the dimension for the svg object where the graphs will be made 
+        var xSize = 600;
+        var ySize = 600;
+        var margin = 100;
+        var xmax = xSize-margin*2;
+        var ymax = ySize-margin*2;
+
+        var div = d3.selectAll("body").append("div")
+        var svg = div.append("svg")
+        .attr("width", xSize)
+        .attr("height", ySize)
+        .style("border", "2px solid black")
+        .append("g")
+        .attr("transform", "translate("+margin+","+margin+")");
+
+        list_of_dicts = [
+            {'continent': 0, "gdp":0, "cases":0}, {'continent': 1, "gdp":0, "cases":0}, {'continent': 2, "gdp":0, "cases":0}, {'continent': 3, "gdp":0, "cases":0}, {'continent': 4, "gdp":0, "cases":0}, {'continent': 5, "gdp":0, "cases":0}
+        ]
+        var x = d3.scaleBand()
+        .domain(list_of_dicts.map(function(d) {
+        return d.continent;
+        })).padding(0.2).range([0, xmax])
+
+
+        svg.append("g")
+        .attr("transform", "translate(0,"+ymax+")")
+        .call(d3.axisBottom(x))  //appending the bottom x axis in svg 
+        .attr('class', 'xaxis');
+
+        var maxy = 0;
+        var y = d3.scaleLinear()
+        .domain([maxy, 0])
+        .range([0, ymax])
+
+        svg.append("g")
+        .call(d3.axisLeft(y))  //appending the left y axis in svg
+        .attr('class', 'yaxis');
+
+        svg.append("text")
+        .attr("x", xSize/2-50)
+        .attr("y", ymax+40)
+        .attr("text-anchor", "end") // setting up the details for the x axis
+        .text("Continents")
+        .style("font-family", "Arial")
+
+        svg.append("text")
+        .attr("x", -xmax/2+200)
+        .attr("y", -55)
+        .attr("text-anchor", "end")
+        .attr("transform", "rotate(-90)")  // setting up the details for the y axis
+        .text("Average GDP & Average new COVID-19 Cases per year")
+        .style("font-family", "Arial")
+
+      // creating the rectangular bars 
+        var bar = svg.selectAll("bar") 
+          .data(list_of_dicts)
+          .enter()
+          .append("g")
+    // creating the bars and editing the properties for cases
+        bar.append("rect") 
+        .attr('class', 'barsCASES')
+        .attr("x", function(d) { return x(d.continent); })
+        .attr("y", function(d) { return y(d.cases); }) 
+        .attr("width", x.bandwidth()/2)
+        .attr("height", function(d) { return ymax - y(d.cases); }) 
+        .style("fill", "rgb(179, 236, 243)")
+        // creating the bars and editing the properties for gdp
+        bar.append("rect") 
+        .attr('class', 'barsGDP')
+        .attr("x", function(d) { return x(d.continent)+x.bandwidth()/2; })
+        .attr("y", function(d) { return y(d.gdp); }) 
+        .attr("width", x.bandwidth()/2)
+        .attr("height", function(d) { return ymax - y(d.gdp); }) 
+        .style("fill", "blue")
+
+    function display(year) {
+         // making the buttons for the different years
+        var b2020button = document.getElementById("2020Button");
+        var b2021abutton = document.getElementById("2021Button");
+        var b2022button = document.getElementById("2022Button");
+        var avgbutton = document.getElementById("avgButton");
+
+        if (year == 2020) {
+            b2020button.style.backgroundColor = "blue";
+            b2021abutton.style.backgroundColor = "rgb(179, 236, 243)";
+            b2022button.style.backgroundColor = "rgb(179, 236, 243)";// 2020 is the selected button
+            avgbutton.style.backgroundColor = "rgb(179, 236, 243)";
+        } else if (year == 2021) {
+            b2020button.style.backgroundColor = "rgb(179, 236, 243)";
+            b2021abutton.style.backgroundColor = "blue";
+            b2022button.style.backgroundColor = "rgb(179, 236, 243)";// 2021 is the selected button
+            avgbutton.style.backgroundColor = "rgb(179, 236, 243)";
+        } else if (year == 2022) {
+            b2020button.style.backgroundColor = "rgb(179, 236, 243)";
+            b2021abutton.style.backgroundColor = "rgb(179, 236, 243)";// 2022 is the selected button
+            b2022button.style.backgroundColor = "blue";
+            avgbutton.style.backgroundColor = "rgb(179, 236, 243)";
+        } else if (year == 'Average') {
+            b2020button.style.backgroundColor = "rgb(179, 236, 243)";
+            b2021abutton.style.backgroundColor = "rgb(179, 236, 243)";// Average is the selected button
+            b2022button.style.backgroundColor = "rgb(179, 236, 243)";
+            avgbutton.style.backgroundColor = "blue";
+        }
+
+        d3.csv(datalink).then(function(data) {
+            var newdata = []
+            if (year == 'Average') {
+                newdata = data;
+            } else {
+                for (var i=0; i<data.length; i++) {
+                    var curdate = new Date(data[i].date);
+                    var curyear = curdate.getFullYear();
+                    if (curyear == year) {
+                        newdata.push(data[i])
+                    }
+                }
+            } 
+            // adding the gdp and cases of each region to the new dictionary
+            list_of_dicts = []
+            var continents = ["Asia", "Africa", "Europe", "Oceania", "South America", "North America"]
+            for (var i=0; i<continents.length; i++) {
+                var dict = {};
+                dict.continent = continents[i];
+                dict.gdp = 0;
+                dict.cases = 0;
+                var counter = 0;
+                for (var j=0; j<newdata.length; j++) {
+                    if (newdata[j].continent == continents[i]) {
+                        if (newdata[j].gdp_per_capita && newdata[j].new_cases){
+                            dict.gdp = dict.gdp + parseInt(newdata[j].gdp_per_capita)
+                            dict.cases = dict.cases + parseInt(newdata[j].new_cases)
+                            counter = counter + 1;
+                        }
+                    }
+                }
+                dict.gdp = dict.gdp/counter
+                dict.cases = dict.cases/counter
+                list_of_dicts.push(dict)
+            }
+            list_of_dicts.sort(function (a,b) {return d3.ascending(a.gdp, b.gdp);});
+            // get max y axis
+            maxy = list_of_dicts[0].gdp;
+            for (var i=0; i<list_of_dicts.length; i++) {
+                if (list_of_dicts[i].gdp>maxy) {
+                    maxy = list_of_dicts[i].gdp;  //maximum for gdp axis
+                }
+                if (list_of_dicts[i].cases>maxy) {
+                    maxy = list_of_dicts[i].cases; //maximum for cases axis
+                }
+            }
+            // get the ordered continents (ordered by gdp)
+            continents = d3.map(list_of_dicts, function(d){return(d.continent)})
+
+            // update the axis
+            var xaxis= d3.selectAll(".xaxis")
+            x.domain(list_of_dicts.map(function(d) { return d.continent; }))
+            xaxis.transition().duration(1000).call(d3.axisBottom(x))
+
+            var yaxis = d3.selectAll(".yaxis")
+            y.domain([maxy, 0]);
+            yaxis.transition().duration(1000).call(d3.axisLeft(y));
+            
+           // setting the properties and transition for bars cases
+            var barsCASES = d3.selectAll(".barsCASES") 
+            .data(list_of_dicts)
+            .transition() 
+            .duration(1000)
+            .attr("x", function(d) { return x(d.continent); })
+            .attr("y", function(d) { return y(d.cases); }) 
+            .attr("width", x.bandwidth()/2)
+            .attr("height", function(d) { return ymax - y(d.cases); }) 
+           
+             // setting the properties and transition for bars gdp
+            var barsGDP = d3.selectAll(".barsGDP") 
+            .data(list_of_dicts)
+            .transition() 
+            .duration(1000)
+            .attr("x", function(d) { return x(d.continent)+x.bandwidth()/2;}) //placing the gdp bar next to the cases bar.
+            .attr("y", function(d) { return y(d.gdp); }) 
+            .attr("width", x.bandwidth()/2)
+            .attr("height", function(d) { return ymax - y(d.gdp); }) 
+
+            // make the value appear over gdp bar on hover:
+            d3.selectAll(".barsGDP")
+                .on("mouseover", function(d, i) {
+                svg.append("text")
+                    .style("font-family", "Arial")
+                    .attr('class', 'val')
+                    .attr('x', function() {
+                    return x(i.continent) + x.bandwidth()/2-x.bandwidth()/8;
+                    })
+                    .attr('y', function() {
+                    return y(i.gdp) - 5;
+                    })
+                    .text(function() {
+                        var rounded = Math.round(i.gdp); //rounding off to nearest integer
+                        return rounded;
+                    })
+                })
+                .on("mouseout", function(d, i) {
+                d3.selectAll('.val').remove()
+                })
+
+            // make the value appear over cases bar on hover:
+            d3.selectAll(".barsCASES")
+                .on("mouseover", function(d, i) {
+                svg.append("text")
+                    .style("font-family", "Arial")
+                    .attr('class', 'val')
+                    .attr('x', function() {
+                    return x(i.continent)-x.bandwidth()/8;
+                    })
+                    .attr('y', function() {
+                    return y(i.cases) - 5;
+                    })
+                    .text(function() {
+                        var rounded = Math.round(i.cases); //rounding off to nearest integer
+                        return rounded;
+                    })
+                })
+                .on("mouseout", function(d, i) {
+                d3.selectAll('.val').remove()
+                })
+
+            //d3.selectAll("body").append("p").text(continents)
+        })
+    }
+
+    display('Average') //setting the average value as default when we open the page
+
+    
+	</script>
+    
+</body>
+</html>

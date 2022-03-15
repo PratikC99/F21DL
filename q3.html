@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+
+<body style="background-color:rgb(176, 230, 205);">
+	<style>
+		h1,h2,
+		h3,
+		h4,
+		p {
+			font-family: Arial;
+			text-align: center;
+		}
+
+		button {
+			font-family: Arial;
+			border: 2px solid black;
+			width: 125px;
+			height: 25px;
+			background-color: rgb(179, 236, 243);
+			color: black;
+            margin: 4px;
+		}
+    div {
+      text-align: center;
+    }
+	</style>
+	<button onclick="window.location.href='Start.html'">Back</button>
+	<h1>Effect of vaccinations and booster jabs on the spread of cases/deaths.</h1>
+    <p></p>
+	<script>
+
+
+ // importing data from the covid dataset
+
+    var datalink = "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv";
+
+    d3.csv(datalink).then(function(data) {
+
+        // get list of unique countries
+        var countries = [] 
+        for (var i=0; i<data.length; i++) {
+            var iso = data[i].iso_code; //initializing a variable to store the array of abbreviations of the countries
+            countries.push(iso)
+        }
+        countries = [...new Set(countries)]
+
+        // make a list of dicts of total vaccinations and cases for each country
+        var list_of_dicts = []
+        for (var i =0; i<countries.length; i++) {
+            var dict = {};
+            dict.iso = countries[i]
+            dict.cases = 0;
+            dict.vaccinations = 0;
+
+            for (var j=0; j<data.length; j++) {
+                if (data[j].iso_code == countries[i]) {
+                    var vaccinations = parseInt(data[j].new_vaccinations)
+                    var cases = parseInt(data[j].new_cases)
+                    if (vaccinations && cases) {
+                        dict.cases = dict.cases + cases; 
+                        dict.vaccinations = dict.vaccinations + vaccinations;
+                    }
+                }
+            }
+
+            list_of_dicts.push(dict)
+        }
+
+        // get the max and min for x and y axis
+        var maxCases = list_of_dicts[0].cases; //max of x axis
+        var minCases = list_of_dicts[0].cases; // min of x axis
+        var maxVaccinations = list_of_dicts[0].vaccinations; //max of y axis
+        var minVaccination = list_of_dicts[0].vaccinations; //min of y axis
+        for (var i=0; i<list_of_dicts.length; i++) {
+            var curcase = list_of_dicts[i].cases;
+            if (curcase<minCases) {  // finding the minimum value for x axis
+                minCases = curcase;
+            }
+            if (curcase>maxCases) {   //finding the maximum value of x axis
+                maxCases = curcase
+            }
+            var curvac = list_of_dicts[i].vaccinations;
+            if (curvac<minVaccination) {   // finding the minimum value for y axis
+                minVaccination = curvac;
+            }
+            if (curvac>maxVaccinations) {  //finding the maximum value of y axis
+                maxVaccinations = curvac
+            }
+        }
+
+        var xSize = 800;
+        var ySize = 800;
+        var margin = 150;
+        var xmax = xSize-margin*2;
+        var ymax = ySize-margin*2;
+
+        var div = d3.selectAll("body").append("div")
+        var svg = div.append("svg")
+            .attr("width", xSize)
+            .attr("height", ySize)
+            .style("border", "2px solid black")
+            .append("g")
+            .attr("transform", "translate("+margin+","+margin+")");
+
+        var x = d3.scaleLinear()
+            .domain([minCases,maxCases])
+            .range([0, xmax])
+        svg.append("g")
+            .attr("transform", "translate(0,"+ymax+")") //making the x axis in svg
+            .call(d3.axisBottom(x))
+            .attr('class', 'xaxis');
+
+        var y = d3.scaleLinear()
+            .domain([maxVaccinations, minVaccination])  //making the y axis in svg
+            .range([0, ymax])
+        svg.append("g")
+            .call(d3.axisLeft(y))
+            .attr('class', 'yaxis');
+         // making the dot for the scatter plot and editing its properties
+        svg.append('g')
+            .selectAll("dot")
+            .data(list_of_dicts)
+            .enter()
+            .append("circle")
+            .attr("cx", function (d) { return x(d.cases); } )
+            .attr("cy", function (d) { return y(d.vaccinations); } )
+            .attr("r", 4)
+            .style("fill", "blue")
+            .on("mouseover", function (event) {
+                var i = d3.select(this);
+                d3.selectAll("body").append("p").text(i)
+            })
+
+        svg.append("text")
+            .attr("x", xSize/2+50)
+            .attr("y", ymax+40)
+            .attr("text-anchor", "end") //description of x axis
+            .text("Cumulative Number COVID-19 Cases")
+            .style("font-family", "Arial")
+
+        svg.append("text")
+            .attr("x", -xmax/2+100)
+            .attr("y", -85)
+            .attr("text-anchor", "end")
+            .attr("transform", "rotate(-90)")  //description of y axis
+            .text("Cumulative Number Vaccinations")
+            .style("font-family", "Arial")
+    })
+
+	</script>
+</body>
+
+</html>
